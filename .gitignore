@@ -1,0 +1,44 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*pyx
+
+# Build & packaging
+build/*
+dist/*
+*egg-info/*
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# VS Code
+.vscode/
+
+# Testing
+.pytest_cache/
+
+# Packaging
+build/
+dist/
+
+# Prototyping files & manual testing
+proto/
+
+# Some other random stuff
+bash.exe.stackdump
+
+# Sphinx documentation
+docs/_build/
+
+# tox
+.tox/

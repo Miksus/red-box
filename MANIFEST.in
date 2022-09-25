@@ -1,0 +1,7 @@
+include versioneer.py
+include redbox/_version.py
+recursive-include redbox/email/templates *.html
+recursive-include redbox/email/templates *.txt
+recursive-include redbox/test/test_files *
+global-include *.pyi
+global-include *.typed

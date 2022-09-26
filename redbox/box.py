@@ -1,16 +1,18 @@
 import imaplib
 import email
-from typing import Union
-from .query import build
-from redbox.models import EmailMessage as RedEmailMessage
+import re
+from typing import Dict, Generator, List, Union
 
-from email.message import EmailMessage
+from redbox.models.mailbox import MailBox
+from .query import build
+from redbox.models.message import EmailMessage
 
 class EmailBox:
     
     cls_message = EmailMessage
+    _mailboxes: List[MailBox]
 
-    def __init__(self, host, port, username, password, mailbox="INBOX", cls_imap=imaplib.IMAP4_SSL, use_starttls=False):
+    def __init__(self, host, port, username=None, password=None, cls_imap=imaplib.IMAP4_SSL, use_starttls=False):
         
         self.host = host
         self.port = port
@@ -20,10 +22,9 @@ class EmailBox:
         self.use_starttls = use_starttls
         self.cls_imap = cls_imap
         self.kws_imap = {}
-        
-        self.mailbox = mailbox
 
         self._connection = None
+        self._mailboxes = None
         
     def __enter__(self):
         self.connect()
@@ -31,6 +32,48 @@ class EmailBox:
     def __exit__(self, *args):
         self.close()
         
+    def __getitem__(self, name: str) -> MailBox:
+        "Get an existing mailbox"
+        for mailbox in self.mailboxes:
+            if mailbox.name == name:
+                return mailbox
+        raise KeyError(f"Mailbox {mailbox!r} not found")
+
+    @property
+    def mailboxes(self) -> List[MailBox]:
+        if self._mailboxes is None:
+            self.update()
+        return self._mailboxes
+
+    def get(self, name:str) -> MailBox:
+        "Get mailbox. If not found, not existing mailbox is returned"
+        try:
+            self[name]
+        except KeyError:
+            return self._construct_mailbox(name=name)
+
+    @property
+    def inbox(self) -> MailBox:
+        "The main email box"
+        return self["INBOX"]
+
+    def update(self):
+        "Update list of mailboxes"
+        self._mailboxes = []
+        typ, data = self.connection.list()
+        for box_data in data:
+            s = box_data.decode("UTF-8")
+            match = re.match(r'^[(](?P<flags>.+)[)] "/" "(?P<name>.+)"', s)
+            items = match.groupdict()
+            name = items['name']
+            flags = items.get('flags').split(' ')
+            mailbox = self._construct_mailbox(name=name, flags=flags)
+
+            self._mailboxes.append(mailbox)
+
+    def _construct_mailbox(self, **kwargs) -> MailBox:
+        return MailBox(**kwargs, cls_message=self.cls_message, session=self.connection)
+
     def connect(self):
         "Connect to the SMTP Server"
         self._connection = self.get_server()
@@ -60,27 +103,7 @@ class EmailBox:
         if user is not None or password is not None:
             server.login(user, password)
         
-        server.select(self.mailbox)
         return server
-
-    def search(self, _query:Union['QueryBase', str]=None, **kwargs):
-        qry = self._format_query(_query, **kwargs)
-        typ, msg_ids = self.connection.search(None, qry)
-        ids_messages = list(msg_ids[0].decode("UTF-8").split(" "))
-        for id in ids_messages:
-            yield self._fetch(id)
-    
-    def _fetch(self, num):
-        typ, data = self.connection.fetch(str(num),'(RFC822)')
-        cls = self.cls_message
-        msg_string = data[0][1].decode("UTF-8")
-        if cls is EmailMessage:
-            msg = cls.message_from_string(msg_string)
-        else:
-            # Custom class
-            msg = cls.from_string(msg_string)
-        msg.message_num = num
-        return msg
     
     def _format_query(self, _query=None, **kwargs) -> str:
         if _query is None:

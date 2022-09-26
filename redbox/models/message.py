@@ -1,137 +1,176 @@
 import datetime
 import email
-from email.message import EmailMessage as EmailMessageStd
-from typing import List, Optional
-from pydantic import BaseModel, Field, validator
+from email.message import EmailMessage
+import imaplib
+import re
+from typing import Dict, List, Optional, Union
+from pydantic import BaseModel, Field, PrivateAttr, validator
+from redbox.utils.inspector import Inspector
 
-class Inspector:
-
-    def __init__(self, msg:EmailMessageStd):
-        self.message = msg
-
-    def get_headers(self) -> dict:
-        return dict(self.message.items())
-
-    def get_html_body(self)->str:
-        for pl in self.message.get_payload():
-            content_type = pl['Content-Type'].split(";")
-            if "text/html" in content_type:
-                return pl.get_payload()
-            elif "multipart/related" in content_type:
-                return Inspector(pl).get_html_body()
-            elif "multipart/alternative" in content_type:
-                return Inspector(pl).get_html_body()
-
-    def get_text_body(self)->str:
-        for pl in self.message.get_payload():
-            content_type = pl['Content-Type'].split(";")
-            if "text/plain" in content_type:
-                return pl.get_payload()
-            elif "multipart/related" in content_type:
-                body = Inspector(pl).get_text_body()
-                if body is not None:
-                    return body
-            elif "multipart/alternative" in content_type:
-                body = Inspector(pl).get_text_body()
-                if body is not None:
-                    return body
-
-    def get_attachments(self) -> List:
-        # Mime types:
-        #   text/plain: For textual files
-        #   application/octet-stream: For all others
-        for pl in self.message.get_payload():
-            content_type = pl['Content-Type'].split(";")[0]
-            if content_type.startswith("application/"):
-                yield Attachment.from_message(pl)
-
-class Attachment(BaseModel):
-    filename: Optional[str]
-    content: str
-    content_type: str
-
-    @staticmethod
-    def _parse_disposition(payload:EmailMessageStd) -> dict:
-        disp_str = payload['Content-Disposition']
-        disps = {}
-        for disp_line in disp_str.split(";"):
-            disp_line = disp_line.strip()
-            if len(disp_line.split("=")) > 1:
-                key, val = disp_line.split("=", 1)
-                disps[key] = val
-            else:
-                disps[disp_line] = None
-        return disps
-        
-    @classmethod
-    def from_message(cls, payload:EmailMessageStd):
-        disposition = cls._parse_disposition(payload)
-
-        return cls(
-            content_type=payload['Content-Type'],
-            content=payload.get_payload(),
-            filename=disposition.get("filename").strip('"'),
-        )
+# https://datatracker.ietf.org/doc/html/rfc2060.html
 
 class EmailMessage(BaseModel):
     """Simplified representation of an email"""
-    content: str = Field(description="Full email as string")
+    class Config:
+        arbitrary_types_allowed = True
 
-    received: str
-    message_id: str
-    
-    message_date: datetime.datetime = Field(alias="date")
-        
-    from_: str
-    subject: str
-    to: List[str]
-    cc: str = None
-    bcc: str = None
+    session: imaplib.IMAP4 = Field(description="Connection session")
+    uid: int = Field(description="ID of the message")
 
-    # Non-headers
-    html_body: str
-    text_body: str
-    attachments: List[Attachment]
-
-    @validator("to", pre=True)
-    def parse_to(cls, value):
-        return value.split(", ")
-
-    @validator("message_date", pre=True)
-    def parse_date(cls, value, values):
-        return datetime.datetime.strptime(value, "%a, %d %b %Y %H:%M:%S %z")
-        
-    @classmethod
-    def from_string(cls, content:str):
-        def format_field(f):
-            f = f.lower().replace("-", "_")
-            if f == "from":
-                return "from_"
-            return f
-
-        msg = email.message_from_string(content)
-        insp = Inspector(msg)
-        headers = insp.get_headers()#dict(msg.items())
-
-        html_body = insp.get_html_body()
-        text_body = insp.get_text_body()
-        attachments = insp.get_attachments()
-
-        headers = {
-            format_field(key): val
-            for key, val in headers.items()
-        }
-
-        return cls(
-            content=content,
-            html_body=html_body,
-            text_body=text_body,
-            attachments=list(attachments),
-            **headers
-        )
+    _content: str = PrivateAttr(default=None)
+    _flags: List[str] = PrivateAttr(default=None)
 
     def __str__(self):
         return self.content
 
-    def to_email(self):
+    def fetch_all(self):
+        msg, flags = self._fetch("(RFC822 FLAGS)")
+        self._content = msg
+        self._flags = self._parse_flags(flags)
+
+# Email content related
+
+    @property
+    def content(self) -> List[str]:
+        if self._content is None:
+            self._content = self._fetch_content()
+        return self._content
+
+    @property
+    def email(self) -> EmailMessage:
         return email.message_from_string(self.content)
+
+    @property
+    def html_body(self) -> str:
+        msg = self.email
+        insp = Inspector(msg)
+        return insp.get_html_body()
+
+    @property
+    def text_body(self) -> str:
+        msg = self.email
+        insp = Inspector(msg)
+        return insp.get_text_body()
+
+# Content headers
+
+    @property
+    def headers(self) -> Dict[str, str]:
+        msg = self.email
+        insp = Inspector(msg)
+        return insp.get_headers()
+
+    @property
+    def from_(self) -> str:
+        headers = {k.lower(): v for k, v in self.headers.items()}
+        return headers['from']
+
+    @property
+    def to(self) -> List[str]:
+        headers = {k.lower(): v for k, v in self.headers.items()}
+        to = headers['to']
+        return re.split(r", ?", to)
+
+    @property
+    def subject(self) -> str:
+        headers = {k.lower(): v for k, v in self.headers.items()}
+        return headers['subject']
+
+    @property
+    def date(self) -> Dict[str, str]:
+        headers = {k.lower(): v for k, v in self.headers.items()}
+        date = headers['date']
+        return datetime.datetime.strptime(date, "%a, %d %b %Y %H:%M:%S %z")
+
+# Flags
+
+    @property
+    def flags(self) -> List[str]:
+        if self._flags is None:
+            self._flags = self._fetch_flags()
+        return self._flags
+
+    @property
+    def seen(self):
+        "Whether the email is read"
+        return r"\Seen" in self.flags
+
+    @property
+    def flagged(self):
+        "Whether the email is read"
+        return r"\Flagged" in self.flags
+
+    @property
+    def deleted(self):
+        "Whether the email is read"
+        return r"\Deleted" in self.flags
+
+    @property
+    def draft(self):
+        "Whether the email is read"
+        return r"\Draft" in self.flags
+
+# Utils
+
+    def _fetch(self, part:str) -> list:
+        typ, data = self.session.fetch(str(self.uid), part)
+        if typ != "OK":
+            raise ConnectionError(f"Error with IMAP: {typ}")
+
+        outputs = []
+        for output in data:
+            if isinstance(output, tuple):
+                # Probably message which are in form:
+                # (b'12345 (RFC822 {123456}', b'Return-Path: <...0759==--\r\n')
+                output = output[1].decode("UTF-8")
+            elif isinstance(output, bytes):
+                # Probably byte string
+                output = output.decode("UTF-8")
+            outputs.append(output)
+        return outputs
+
+    def _store(self, command, flags):
+        self.session.store(str(self.uid), command, flags)
+
+# Modify flags
+
+    def add_flag(self, *flags:str):
+        # \Deleted \Flagged \Seen
+        flag_set = ' '.join(flags) 
+        self._store('+FLAGS', flag_set)
+
+    def set_flag(self, *flags:str):
+        # \Deleted \Flagged \Seen
+        flag_set = ' '.join(flags) 
+        self._store('FLAGS', flag_set)
+
+    def remove_flag(self, *flags:str):
+        flag_set = ' '.join(flags) 
+        self._store('-FLAGS', flag_set)
+
+    def set(self, seen:bool=None, flagged:bool=None, answered:bool=None, draft:bool=None, deleted:bool=None):
+        "Set/unset flags"
+        kwargs = {
+            r'\Seen': seen,
+            r'\Flagged': flagged,
+            r'\Answered': answered,
+            r'\Draft': draft,
+            r'\Deleted': deleted,
+        }
+        add_flags = [key for key, val in kwargs.items() if val]
+        del_flags = [key for key, val in kwargs.items() if not val and val is not None]
+        self.add_flag(*add_flags)
+        self.remove_flag(*del_flags)
+
+    def _fetch_content(self):
+        # Equivalent to BODY[]
+        return self._fetch('(RFC822)')[0]
+
+    def _fetch_flags(self) -> List[str]:
+        out = self._fetch('(FLAGS)')[0]
+        return self._parse_flags(out)
+
+    def _parse_flags(self, flags:str) -> List[str]:
+        flags = re.sub(r'^[0-9]* [(]FLAGS [(]', '', flags)
+        return flags.strip("()").split(" ")
+

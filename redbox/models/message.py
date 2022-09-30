@@ -14,8 +14,9 @@ class EmailMessage(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    session: imaplib.IMAP4 = Field(description="Connection session")
-    uid: int = Field(description="ID of the message")
+    session: imaplib.IMAP4 = Field(description="Connection session.")
+    uid: int = Field(description="ID of the message.")
+    mailbox: str = Field(description="Mailbox in which the message is in.")
 
     _content: str = PrivateAttr(default=None)
     _flags: List[str] = PrivateAttr(default=None)
@@ -113,6 +114,7 @@ class EmailMessage(BaseModel):
 # Utils
 
     def _fetch(self, part:str) -> list:
+        self.session.select(self.mailbox)
         typ, data = self.session.fetch(str(self.uid), part)
         if typ != "OK":
             raise ConnectionError(f"Error with IMAP: {typ}")

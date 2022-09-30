@@ -52,18 +52,31 @@ class EmailBox:
         except KeyError:
             return self._construct_mailbox(name=name)
 
+    def create(self, name:str) -> MailBox:
+        "Create a mailbox"
+        mailbox = self._construct_mailbox(name=name)
+        mailbox.create()
+        return mailbox
+
     @property
     def inbox(self) -> MailBox:
         "The main email box"
-        return self["INBOX"]
+        for name in ('INBOX', 'Inbox', 'inbox'):
+            try:
+                return self[name]
+            except KeyError:
+                pass
+        raise KeyError("Inbox not found")
 
     def update(self):
         "Update list of mailboxes"
+        # Outlook: b'(\\HasNoChildren) "/" Archive'
+        # Gmail: b'(\\HasNoChildren) "/" "INBOX"'
         self._mailboxes = []
         typ, data = self.connection.list()
         for box_data in data:
             s = box_data.decode("UTF-8")
-            match = re.match(r'^[(](?P<flags>.+)[)] "/" "(?P<name>.+)"', s)
+            match = re.match(r'^[(](?P<flags>.+)[)] "/" "?(?P<name>.+)"?', s)
             items = match.groupdict()
             name = items['name']
             flags = items.get('flags').split(' ')
@@ -110,3 +123,11 @@ class EmailBox:
             return build(**kwargs)
         else:
             return str(_query)
+
+    @property
+    def password(self):
+        return '*****'
+
+    @password.setter
+    def password(self, value):
+        self.__password = value

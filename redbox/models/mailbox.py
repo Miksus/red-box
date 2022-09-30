@@ -53,8 +53,11 @@ class MailBox(BaseModel):
         qry = self._format_query(_query, **kwargs)
         typ, msg_ids = self.session.search(None, qry)
         ids_messages = list(msg_ids[0].decode("UTF-8").split(" "))
+        if ids_messages == ['']:
+            # No messages found
+            return []
         return [
-            self.cls_message(uid=int(uid), session=self.session)
+            self.cls_message(uid=int(uid), session=self.session, mailbox=self.name)
             for uid in ids_messages
         ]
     

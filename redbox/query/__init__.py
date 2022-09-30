@@ -50,7 +50,8 @@ KEYWORD = ValueField("KEYWORD")
 UNKEYWORD = ValueField("UNKEYWORD")
 
 def _build(key:str, val):
-    key = key.upper()
+    # Turning from_ --> "FROM", "to" --> "TO" etc.
+    key = key.upper().rstrip("_")
     obj = BaseField._fields[key]
     if isinstance(obj, Flag):
         if val:

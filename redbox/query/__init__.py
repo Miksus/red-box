@@ -53,7 +53,7 @@ def _build(key:str, val):
     # Turning from_ --> "FROM", "to" --> "TO" etc.
     key = key.upper().rstrip("_")
     obj = BaseField._fields[key]
-    if isinstance(obj, Flag):
+    if isinstance(obj, Flag) or obj is ALL:
         if val:
             yield obj
         else:

@@ -14,3 +14,4 @@ Welcome to Red Box's tutorials!
    query_fields
    message
    config
+   query_cookbook

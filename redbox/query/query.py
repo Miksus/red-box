@@ -49,6 +49,8 @@ class CompareField(BaseField):
         return LogicalFilled(self, (a, b))
 
     def __str__(self):
+        if self._name == "ALL":
+            return f"({self._name})"
         raise ValueError(f"{self._name} requires statement")
 
 class NotField(BaseField):

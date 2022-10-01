@@ -41,3 +41,16 @@ def test_search_query(IMAP4):
     assert inbox.search(SUBJECT("example 2") & SEEN & FROM('miksus@example.com')) == [
         EmailMessage(uid=2, session=inbox.session, mailbox="INBOX"),
     ]
+
+def test_search_string(IMAP4):
+    box = EmailBox(host="localhost", port=0, cls_imap=IMAP4)
+    inbox = box.inbox
+    assert inbox.search('(SUBJECT "example 1")') == [
+        EmailMessage(uid=1, session=inbox.session, mailbox="INBOX")
+    ]
+    assert inbox.search('(ALL (SUBJECT "example 2") (UNSEEN))') == [
+        EmailMessage(uid=2, session=inbox.session, mailbox="INBOX"),
+    ]
+    assert inbox.search('(ALL (ALL (SUBJECT "example 2") (SEEN)) (FROM "miksus@example.com"))') == [
+        EmailMessage(uid=2, session=inbox.session, mailbox="INBOX"),
+    ]

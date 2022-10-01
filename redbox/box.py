@@ -3,14 +3,14 @@ import email
 import re
 from typing import Dict, Generator, List, Union
 
-from redbox.models.mailbox import MailBox
+from redbox.models.mailbox import MailFolder
 from .query import build
 from redbox.models.message import EmailMessage
 
 class EmailBox:
     
     cls_message = EmailMessage
-    _mailboxes: List[MailBox]
+    _mailfolders: List[MailFolder]
 
     def __init__(self, host, port, username=None, password=None, cls_imap=imaplib.IMAP4_SSL, use_starttls=False):
         
@@ -24,7 +24,7 @@ class EmailBox:
         self.kws_imap = {}
 
         self._connection = None
-        self._mailboxes = None
+        self._mailfolders = None
         
     def __enter__(self):
         self.connect()
@@ -32,34 +32,34 @@ class EmailBox:
     def __exit__(self, *args):
         self.close()
         
-    def __getitem__(self, name: str) -> MailBox:
+    def __getitem__(self, name: str) -> MailFolder:
         "Get an existing mailbox"
-        for mailbox in self.mailboxes:
+        for mailbox in self.mailfolders:
             if mailbox.name == name:
                 return mailbox
         raise KeyError(f"Mailbox {mailbox!r} not found")
 
     @property
-    def mailboxes(self) -> List[MailBox]:
-        if self._mailboxes is None:
+    def mailfolders(self) -> List[MailFolder]:
+        if self._mailfolders is None:
             self.update()
-        return self._mailboxes
+        return self._mailfolders
 
-    def get(self, name:str) -> MailBox:
+    def get(self, name:str) -> MailFolder:
         "Get mailbox. If not found, not existing mailbox is returned"
         try:
             self[name]
         except KeyError:
             return self._construct_mailbox(name=name)
 
-    def create(self, name:str) -> MailBox:
+    def create(self, name:str) -> MailFolder:
         "Create a mailbox"
         mailbox = self._construct_mailbox(name=name)
         mailbox.create()
         return mailbox
 
     @property
-    def inbox(self) -> MailBox:
+    def inbox(self) -> MailFolder:
         "The main email box"
         for name in ('INBOX', 'Inbox', 'inbox'):
             try:
@@ -69,23 +69,26 @@ class EmailBox:
         raise KeyError("Inbox not found")
 
     def update(self):
-        "Update list of mailboxes"
+        "Update list of mailfolders"
         # Outlook: b'(\\HasNoChildren) "/" Archive'
         # Gmail: b'(\\HasNoChildren) "/" "INBOX"'
-        self._mailboxes = []
+        self._mailfolders = []
         typ, data = self.connection.list()
         for box_data in data:
             s = box_data.decode("UTF-8")
-            match = re.match(r'^[(](?P<flags>.+)[)] "/" "?(?P<name>.+)"?', s)
+            # box_data is in form: 
+            # - '(\\HasNoChildren) "/" INBOX'
+            # - '(\\HasNoChildren) "/" "Inbox"'
+            match = re.match(r'^[(](?P<flags>[^")]+)[)] "/" "?(?P<name>[^"]+)', s)
             items = match.groupdict()
             name = items['name']
             flags = items.get('flags').split(' ')
             mailbox = self._construct_mailbox(name=name, flags=flags)
 
-            self._mailboxes.append(mailbox)
+            self._mailfolders.append(mailbox)
 
-    def _construct_mailbox(self, **kwargs) -> MailBox:
-        return MailBox(**kwargs, cls_message=self.cls_message, session=self.connection)
+    def _construct_mailbox(self, **kwargs) -> MailFolder:
+        return MailFolder(**kwargs, cls_message=self.cls_message, session=self.connection)
 
     def connect(self):
         "Connect to the SMTP Server"

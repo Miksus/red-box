@@ -7,7 +7,7 @@ from redbox.query import build
 from redbox.query.query import BaseQuery
 
 
-class MailBox(BaseModel):
+class MailFolder(BaseModel):
     class Config:
         arbitrary_types_allowed=True
 

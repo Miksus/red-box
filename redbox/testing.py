@@ -15,7 +15,7 @@ class DummyGmailImap(imaplib.IMAP4):
     _emails = {}
     _flags = {}
 
-    def open(self, host = '', port = 134):
+    def open(self, host = '', port = 134, timeout=None):
         """Setup connection to remote server on "host:port"
             (default: localhost:standard IMAP4 port).
         This connection will be used by the routines:

@@ -43,6 +43,12 @@ It should look like this:
     box = EmailBox(host="localhost", port=0)
     msgs = box['INBOX'].search(subject="example 2", unseen=True)
 
+Red Box has several features:
+
+- :ref:`Easy email search <querying>`
+- :ref:`Easy email message manipulation <message>`
+- :ref:`Easy email configuration <config>`
+
 Furthermore, Red Box has custom message type that makes manipulating 
 the messages easy:
 
@@ -63,6 +69,23 @@ the messages easy:
     print(msg.to)
     print(msg.date)
 
+Here is a more complete example:
+
+.. code-block:: python
+
+    from redbox import EmailBox
+
+    box = EmailBox(host="localhost", port=0)
+    inbox = box['INBOX']
+
+    for msg in inbox.search(subject="example 2", unseen=True):
+
+        # Process the message
+        print(msg.subject)
+        print(msg.text_body)
+
+        # Set the message as read/seen
+        msg.read()
 
 Interested?
 -----------

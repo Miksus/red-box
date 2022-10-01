@@ -50,6 +50,8 @@ emails = inbox.search(
 )
 ```
 
+## More Examples
+
 There is also a query language for arbitrary search queries:
 
 ```python
@@ -78,6 +80,25 @@ print(email.html_body)
 print(email.from_)
 print(email.to)
 print(email.date)
+```
+
+Here is a complete example:
+
+```python
+
+from redbox import EmailBox
+
+box = EmailBox(host="localhost", port=0)
+inbox = box['INBOX']
+
+for msg in inbox.search(subject="example 2", unseen=True):
+
+    # Process the message
+    print(msg.subject)
+    print(msg.text_body)
+
+    # Set the message as read/seen
+    msg.read()
 ```
 
 ---

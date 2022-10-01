@@ -12,4 +12,5 @@ Welcome to Red Box's tutorials!
    getting_started
    querying
    query_fields
+   message
    config

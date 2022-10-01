@@ -1,18 +1,24 @@
 
-# Red Box: Advanced Email Manager (UNDER DEVELOPMENT)
-> Next generation email box manager
+# Red Box: Advanced Email Box Reader
+> Next generation email box reader/manager
 
 ---
 
-[![Pypi version](https://badgen.net/pypi/v/redmail)](https://pypi.org/project/redbox/)
-[![build](https://github.com/Miksus/red-mail/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/Miksus/red-box/actions/workflows/main.yml)
-[![codecov](https://codecov.io/gh/Miksus/red-mail/branch/master/graph/badge.svg?token=IMR1CQT9PY)](https://codecov.io/gh/Miksus/red-box)
-[![Documentation Status](https://readthedocs.org/projects/red-mail/badge/?version=latest)](https://red-box.readthedocs.io/en/latest/)
-[![PyPI pyversions](https://badgen.net/pypi/python/redmail)](https://pypi.org/project/redmail/)
+[![Pypi version](https://badgen.net/pypi/v/redbox)](https://pypi.org/project/redbox/)
+[![build](https://github.com/Miksus/red-box/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/Miksus/red-box/actions/workflows/main.yml)
+[![codecov](https://codecov.io/gh/Miksus/red-box/branch/master/graph/badge.svg?token=IMR1CQT9PY)](https://codecov.io/gh/Miksus/red-box)
+[![Documentation Status](https://readthedocs.org/projects/red-box/badge/?version=latest)](https://red-box.readthedocs.io)
+[![PyPI pyversions](https://badgen.net/pypi/python/redbox)](https://pypi.org/project/redbox/)
 
 
 ## What is it?
-Red Box is an advanced email reader library. It is a sister project for Red Mail (advanced email sender).
+Red Box is an advanced email box reader library. It is a sister library for [Red Mail, advanced email sender](https://github.com/Miksus/red-mail). It makes managing your email box in Python very easy.
+
+Core features:
+
+- Easy email searching
+- Intuitive message manipulation
+- Intuitive email box manipulation
 
 Install it from PyPI:
 
@@ -28,17 +34,57 @@ Red Box makes reading email boxes easy.
 With Red Box, it is simple as this:
 
 ```python
-from redmail import EmailSender
+from redbox import EmailBox
 
+# Create an email box instance
 box = EmailBox(host="localhost", port=0)
 
-emails = box.search(
-    since="2022-01-01",
-    sender="you@example.com"
+# Select an email folder
+inbox = box['INBOX']
+
+# Get emails
+emails = inbox.search(
+    from_="mikael.koli@example.com",
+    subject="Red Box released",
+    unseen=True
 )
 ```
 
+There is also a query language for arbitrary search queries:
+
+```python
+from redbox.query import FROM, UNSEEN, FLAGGED
+
+emails = inbox.search(
+    FROM('mikael.koli@example.com') & (UNSEEN | FLAGGED)
+)
+```
+
+Red Box also makes reading different parts of the email messages
+easy:
+
+```python
+# Get one email
+email = emails[0]
+
+# String representation of the message
+print(email.content)
+
+# Email contents
+print(email.text_body)
+print(email.html_body)
+
+# Email headers
+print(email.from_)
+print(email.to)
+print(email.date)
+```
+
 ---
+
+See more from the documentation.
+
+If the library helped you save time, consider buying a coffee for the maintainer ☕.
 
 ## Author
 

@@ -36,9 +36,9 @@ def test_expression(qry, expected):
         pytest.param(dict(seen=False), '(NOT (SEEN))'),
         pytest.param(dict(since="2022-01-01"), '(SINCE "2022-01-01")'),
         pytest.param(dict(header=('Mime-Version', '1.0')), '(HEADER "Mime-Version" "1.0")'),
-        pytest.param(dict(since="2022-01-01", seen=True), '(SINCE "2022-01-01") (SEEN)'),
+        pytest.param(dict(since="2022-01-01", seen=True), '(ALL (SINCE "2022-01-01") (SEEN))'),
 
-        pytest.param(dict(from_="me@example.com"), '(FROM "me@example.com") (SEEN)'),
+        pytest.param(dict(from_="me@example.com"), '(FROM "me@example.com")'),
 
     ], ids=lambda x: x if isinstance(x, str) else ""
 )
@@ -49,7 +49,7 @@ def test_compile(qry, expected):
 @pytest.mark.parametrize(
     "qry,expected",
     [
-        pytest.param(dict(header={'Mime-Version': '1.0', 'Precedence': 'list'}), '(HEADER "Mime-Version" "1.0") (HEADER "Precedence" "list")'),
+        pytest.param(dict(header={'Mime-Version': '1.0', 'Precedence': 'list'}), '(ALL (HEADER "Mime-Version" "1.0") (HEADER "Precedence" "list"))'),
 
     ]
 )

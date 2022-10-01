@@ -61,7 +61,11 @@ def _build(key:str, val):
     elif isinstance(obj, ValueField):
         yield obj(val)
     elif isinstance(obj, KeyValueField):
-        yield obj(*val)
+        if isinstance(val, dict):
+            for key, subval in val.items():
+                yield obj(key, subval)
+        else:
+            yield obj(*val)
     else:
         raise TypeError("Invalid field")
 

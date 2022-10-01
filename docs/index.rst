@@ -7,7 +7,7 @@
    :file: header.html
 
 - `Documentation <https://redbox.readthedocs.io/>`_
-- `Source code (Github) <https://github.com/Miksus/redbox>`_
+- `Source code (Github) <https://github.com/Miksus/red-box>`_
 - `Releases (PyPI) <https://pypi.org/project/redbox/>`_
 
 This is a sister library for `Red Mail, advanced email sender <https://red-mail.readthedocs.io/>`_.

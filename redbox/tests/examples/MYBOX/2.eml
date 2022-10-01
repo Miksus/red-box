@@ -1,0 +1,23 @@
+MIME-Version: 1.0
+Date: Sat, 1 Oct 2022 00:23:04 +0300
+Message-ID: <CA+kW7VxrFDRYL=toDadUGpQxYKUHmUji9qQoV2-pSfn9_=BX_w@mail.gmail.com>
+Subject: Example 3
+From: Mikael Koli <miksus@example.com>
+To: Receiver <receiver@example.com>
+Content-Type: multipart/alternative; boundary="00000000000078e58e05e9eb99a5"
+
+--00000000000078e58e05e9eb99a5
+Content-Type: text/plain; charset="UTF-8"
+
+Hi,
+
+this is an example.
+
+- Mikael
+
+--00000000000078e58e05e9eb99a5
+Content-Type: text/html; charset="UTF-8"
+
+<div dir="ltr">Hi,<div><br></div><div>this is an example.</div><div><br></div><div>- Mikael</div></div>
+
+--00000000000078e58e05e9eb99a5--

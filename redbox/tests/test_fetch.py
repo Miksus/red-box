@@ -50,5 +50,34 @@ def test_fetch(IMAP4):
 def test_set_flags(IMAP4):
     box = EmailBox(host="localhost", port=0, cls_imap=DummyGmailImap)
     
+    msg = EmailMessage(uid=1, session=box.inbox.session, mailbox="MYBOX")
+    assert msg.seen
+    assert msg.flagged
+    assert not msg.deleted
+    msg.set(seen=False, flagged=True, deleted=True)
+
+    assert not msg.seen
+    assert msg.flagged
+    assert msg.deleted
+
+def test_set_flags_methods(IMAP4):
+    box = EmailBox(host="localhost", port=0, cls_imap=DummyGmailImap)
+    
     msg = EmailMessage(uid=2, session=box.inbox.session, mailbox="MYBOX")
-    msg.set(seen=False, flagged=True)
+    assert not msg.seen
+    assert not msg.flagged
+    assert not msg.deleted
+    
+    msg.read()
+    msg.delete()
+    msg.flag()
+    assert msg.seen
+    assert msg.flagged
+    assert msg.deleted
+
+    msg.unread()
+    msg.undelete()
+    msg.unflag()
+    assert not msg.seen
+    assert not msg.flagged
+    assert not msg.deleted

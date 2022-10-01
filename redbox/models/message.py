@@ -83,12 +83,36 @@ class EmailMessage(BaseModel):
         date = headers['date']
         return datetime.datetime.strptime(date, "%a, %d %b %Y %H:%M:%S %z")
 
+    def read(self):
+        "Read the message (set flag '\Seen')"
+        self.set(seen=True)
+
+    def unread(self):
+        "Unread the message (remove flag '\Seen')"
+        self.set(seen=False)
+
+    def flag(self):
+        "Flag the message (set flag '\Flagged')"
+        self.set(flagged=True)
+
+    def unflag(self):
+        "Remove flag from the message (remove flag '\Flagged')"
+        self.set(flagged=False)
+
+    def delete(self):
+        "Delete the message (set flag '\Deleted')"
+        self.set(deleted=True)
+
+    def undelete(self):
+        "Undelete the message (remove flag '\Deleted')"
+        self.set(deleted=False)
+
 # Flags
 
     @property
     def flags(self) -> List[str]:
         if self._flags is None:
-            self._flags = self._fetch_flags()
+            self.update_flags()
         return self._flags
 
     @property
@@ -132,7 +156,11 @@ class EmailMessage(BaseModel):
         return outputs
 
     def _store(self, command, flags):
+        self.session.select(self.mailbox)
         self.session.store(str(self.uid), command, flags)
+
+    def update_flags(self):
+        self._flags = self._fetch_flags()
 
 # Modify flags
 
@@ -161,8 +189,12 @@ class EmailMessage(BaseModel):
         }
         add_flags = [key for key, val in kwargs.items() if val]
         del_flags = [key for key, val in kwargs.items() if not val and val is not None]
-        self.add_flag(*add_flags)
-        self.remove_flag(*del_flags)
+        if add_flags:
+            self.add_flag(*add_flags)
+        if del_flags:
+            self.remove_flag(*del_flags)
+
+        self.update_flags()
 
     def _fetch_content(self):
         # Equivalent to BODY[]

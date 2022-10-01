@@ -109,6 +109,16 @@ class DummyGmailImap(imaplib.IMAP4):
         else:
             raise self.error("FETCH command error: BAD [b'Could not parse command']")
 
+    def store(self, message_set, command, flags):
+        if command == '+FLAGS':
+            self._flags[self._current_box][message_set] += flags.split(" ")
+            return
+        elif command == '-FLAGS':
+            for flag in flags.split(" "):
+                self._flags[self._current_box][message_set].remove(flag)
+            return
+        raise NotImplementedError
+
     def login(self, user, password):
         if (user, password) not in self._users:
             raise self.error()

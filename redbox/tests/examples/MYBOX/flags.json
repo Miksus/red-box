@@ -1,3 +1,4 @@
 {
-    "1.eml": ["\\Flagged", "\\Seen"]
+    "1.eml": ["\\Flagged", "\\Seen"],
+    "2.eml": []
 }

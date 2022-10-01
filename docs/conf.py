@@ -32,7 +32,6 @@ extensions = [
     'sphinx.ext.autodoc', 
     'sphinx.ext.coverage', 
     'sphinx.ext.napoleon',
-    'sphinx_book_theme',
     'sphinx.ext.extlinks',
     'sphinx_copybutton',
 ]

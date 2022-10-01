@@ -7,12 +7,6 @@ class BaseQuery:
         return ALL(self, other)
 
     def __or__(self, other):
-        comps = []
-        for c in (self, other):
-            if isinstance(c, OR):
-                ...
-            if isinstance(c, ALL):
-                raise ValueError("Nested queries not supported")
         return OR(self, other)
 
     def __invert__(self):

@@ -1,6 +1,6 @@
 
 import pytest
-from redbox.query import ALL, NEW, OR, TO, UNSEEN, SINCE, RECENT, NOT, TEXT, HEADER, build
+from redbox.query import ALL, NEW, OR, TO, UNSEEN, SINCE, RECENT, NOT, TEXT, HEADER, SUBJECT, SEEN, build
 
 # A282 SEARCH FLAGGED SINCE 1-Feb-1994 NOT FROM "Smith"
 
@@ -19,6 +19,7 @@ from redbox.query import ALL, NEW, OR, TO, UNSEEN, SINCE, RECENT, NOT, TEXT, HEA
         pytest.param(HEADER("Mime-Version", "1.0"), '(HEADER "Mime-Version" "1.0")'),
 
         pytest.param(NOT(NEW & TEXT("hello")), '(NOT (ALL (NEW) (TEXT "hello")))'),
+        pytest.param((SUBJECT('Example 1') & SEEN) | (SUBJECT('Example 2') & ~~SEEN), '(OR (ALL (SUBJECT "Example 1") (SEEN)) (ALL (SUBJECT "Example 2") (NOT (NOT (SEEN)))))'),
         pytest.param(TO("me@example.com") & TO("you@example.com"), '(ALL (TO "me@example.com") (TO "you@example.com"))'),
 
     ], ids=lambda x: x if isinstance(x, str) else ""

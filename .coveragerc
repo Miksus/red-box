@@ -2,7 +2,8 @@
 source = redbox
 branch = False
 omit = 
-    test/*
+    tests/*
+    redbox/testing.py
     _version.py
 
 data_file = cov_data/.coverage
@@ -10,7 +11,8 @@ data_file = cov_data/.coverage
 [report]
 
 omit = 
-    redbox/test/*
+    redbox/tests/*
+    redbox/testing.py
     redbox/_version.py
 
 # Regexes for lines to exclude from consideration

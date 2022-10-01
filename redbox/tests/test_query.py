@@ -11,6 +11,7 @@ from redbox.query import ALL, NEW, OR, TO, UNSEEN, SINCE, RECENT, NOT, TEXT, HEA
 @pytest.mark.parametrize(
     "qry,expected",
     [
+        pytest.param(ALL, '(ALL)'),
         pytest.param(UNSEEN, '(UNSEEN)'),
         pytest.param(NOT(UNSEEN), '(NOT (UNSEEN))'),
         pytest.param(~UNSEEN, '(NOT (UNSEEN))'),
@@ -30,6 +31,7 @@ def test_expression(qry, expected):
 @pytest.mark.parametrize(
     "qry,expected",
     [
+        pytest.param(dict(all=True), '(ALL)'),
         pytest.param(dict(unseen=True), '(UNSEEN)'),
         pytest.param(dict(unseen=False), '(NOT (UNSEEN))'),
         pytest.param(dict(seen=True), '(SEEN)'),

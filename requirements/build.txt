@@ -1,0 +1,5 @@
+pytest
+
+# Package requirements
+pydantic
+

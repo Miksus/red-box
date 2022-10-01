@@ -1,0 +1,6 @@
+# Testing
+pytest
+pytest-cov
+
+# Package requirements
+pydantic

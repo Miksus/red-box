@@ -1,0 +1,47 @@
+MIME-Version: 1.0
+Date: Sat, 1 Oct 2022 00:56:48 +0300
+Message-ID: <CA+kW7VwbvQiZvFQBKyQeDVSnu45sDsiOqp8eVSM7OMUFhEWDyg@mail.gmail.com>
+Subject: Example 1
+From: Mikael Koli <miksus@example.com>
+To: You <you@example.com>
+Content-Type: multipart/alternative; boundary="0000000000001bc63e05e9ec121d"
+
+--0000000000001bc63e05e9ec121d
+Content-Type: text/plain; charset="UTF-8"
+
+Hi,
+
+I hope you have had a nice day. I'm not sure if I had one. Sometimes on
+these rainy autumnal days, it gets lonely and today I just felt down. I
+have a strong desire to have a meaningful impact on others but sometimes it
+feels like people are only temporarily in my life.
+
+Here I am writing an email to you, a complete stranger. There is almost no
+chance we will ever meet or we will ever hear each other's voice. However,
+here we are having a one-directional conversation. In this very short
+window, I had a chance to be part of your life for this brief moment.
+Chances are you are a nice person.
+
+I find it odd you came here, to my test files, but I respect your
+attention. I hope I had a meaningful impact.
+
+Kind regards,
+Mikael
+
+--0000000000001bc63e05e9ec121d
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">Hi,<br><br>I hope you have had a nice day. I&#39;m not sur=
+e if I had one. Sometimes on these rainy autumnal days, it gets lonely and =
+today I just felt down. I have a strong desire to have a meaningful impact =
+on others but sometimes it feels like people are only temporarily in my lif=
+e.<br><br>Here I am writing an email to you, a complete stranger. There is =
+almost no chance we will ever meet or we will ever hear each other&#39;s vo=
+ice. However, here we are having a one-directional conversation. In this ve=
+ry short window, I had a chance to be part of your life for this brief mome=
+nt. Chances are you are a nice person.<br><br>I find it odd you came here, =
+to my test files, but I respect your attention. I hope I had a meaningful i=
+mpact.<br><br>Kind regards,<br>Mikael<br></div>
+
+--0000000000001bc63e05e9ec121d--

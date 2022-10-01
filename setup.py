@@ -14,11 +14,11 @@ setup(
     package_data={package: ["py.typed", "*.pyi", "**/*.pyi"] for package in find_packages()},
     packages=find_packages(),
     zip_safe=False,
-    description="Email box managing library",
+    description="Email box reading library",
     long_description=long_description,
     long_description_content_type="text/markdown",
     classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 4 - Beta",
         "Topic :: Communications :: Email",
         "Operating System :: OS Independent",
         "License :: OSI Approved :: MIT License",
@@ -33,9 +33,11 @@ setup(
         "Intended Audience :: Developers",
         "Intended Audience :: Customer Service",
         "Intended Audience :: Financial and Insurance Industry",
-     ],
-     include_package_data=True, # for MANIFEST.in
-     python_requires='>=3.6.0',
+    ],
+    include_package_data=True, # for MANIFEST.in
+    python_requires='>=3.6.0',
 
-    install_requires = [],
+    install_requires = [
+        "pydantic"
+    ],
 )

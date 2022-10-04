@@ -6,7 +6,7 @@
 .. raw:: html
    :file: header.html
 
-- `Documentation <https://redbox.readthedocs.io/>`_
+- `Documentation <https://red-box.readthedocs.io/>`_
 - `Source code (Github) <https://github.com/Miksus/red-box>`_
 - `Releases (PyPI) <https://pypi.org/project/redbox/>`_
 

@@ -10,6 +10,9 @@
 [![Documentation Status](https://readthedocs.org/projects/red-box/badge/?version=latest)](https://red-box.readthedocs.io)
 [![PyPI pyversions](https://badgen.net/pypi/python/redbox)](https://pypi.org/project/redbox/)
 
+- [Documentation](https://red-box.readthedocs.io)
+- [Source code](https://github.com/Miksus/red-box)
+- [Releases](https://pypi.org/project/redbox/)
 
 ## What is it?
 Red Box is an advanced email box reader library. It is a sister library for [Red Mail, advanced email sender](https://github.com/Miksus/red-mail). It makes managing your email box in Python very easy.

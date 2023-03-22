@@ -13,7 +13,7 @@ ROOT = Path(PATH_TEST).parent / "examples"
 
 def test_fetch(IMAP4):
     box = EmailBox(host="localhost", port=0, cls_imap=DummyGmailImap)
-    
+
     msg = EmailMessage(uid=1, session=box.inbox.session, mailbox="MYBOX")
     assert msg.content == (ROOT / "MYBOX/1.eml").read_text()
     assert isinstance(msg.email, Message)
@@ -49,7 +49,7 @@ def test_fetch(IMAP4):
 
 def test_set_flags(IMAP4):
     box = EmailBox(host="localhost", port=0, cls_imap=DummyGmailImap)
-    
+
     msg = EmailMessage(uid=1, session=box.inbox.session, mailbox="MYBOX")
     assert msg.seen
     assert msg.flagged
@@ -62,12 +62,12 @@ def test_set_flags(IMAP4):
 
 def test_set_flags_methods(IMAP4):
     box = EmailBox(host="localhost", port=0, cls_imap=DummyGmailImap)
-    
+
     msg = EmailMessage(uid=2, session=box.inbox.session, mailbox="MYBOX")
     assert not msg.seen
     assert not msg.flagged
     assert not msg.deleted
-    
+
     msg.read()
     msg.delete()
     msg.flag()
@@ -81,3 +81,31 @@ def test_set_flags_methods(IMAP4):
     assert not msg.seen
     assert not msg.flagged
     assert not msg.deleted
+
+
+
+def test_single_part_text_plain(IMAP4):
+    box = EmailBox(host="localhost", port=0, cls_imap=DummyGmailImap)
+
+    msg = EmailMessage(uid=3, session=box.inbox.session, mailbox="INBOX")
+
+    assert msg.subject == "redacted subject"
+    assert msg.text_body == dedent("""
+        line 1
+        line 2
+        """
+    )[1:]
+
+    assert msg.html_body is None
+
+
+def test_single_part_text_html(IMAP4):
+    box = EmailBox(host="localhost", port=0, cls_imap=DummyGmailImap)
+
+    msg = EmailMessage(uid=2, session=box.inbox.session, mailbox="INBOX")
+
+    assert msg.text_body is None
+    assert msg.html_body.strip() == dedent("""
+    <html><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body><div dir="ltr"><br></div></body></html>
+    """).strip()

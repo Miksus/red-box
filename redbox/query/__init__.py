@@ -1,4 +1,4 @@
-from .query import Flag, ValueField, KeyValueField, ALL, OR, NOT, BaseField
+from .query import Flag, ValueField, DateField, KeyValueField, ALL, OR, NOT, BaseField
 
 HEADER = KeyValueField("HEADER")
 
@@ -21,7 +21,6 @@ OLD = Flag("OLD")
 SEEN = Flag("SEEN")
 UNSEEN = Flag("UNSEEN")
 
-
 BCC = ValueField("BCC")
 CC = ValueField("CC")
 
@@ -32,15 +31,13 @@ BODY = ValueField("BODY")
 TO = ValueField("TO")
 FROM = ValueField("FROM")
 
-ON = ValueField("ON")
+SENTBEFORE = DateField("SENTBEFORE")
+SENTON = DateField("SENTON")
+SENTSINCE = DateField("SENTSINCE")
 
-
-SENTON = ValueField("SENTON")
-SENTBEFORE = ValueField("SENTBEFORE")
-SENTSINCE = ValueField("SENTSINCE")
-
-BEFORE = ValueField("BEFORE")
-SINCE = ValueField("SINCE")
+BEFORE = DateField("BEFORE")
+ON = DateField("ON")
+SINCE = DateField("SINCE")
 
 LARGER = ValueField("LARGER")
 SMALLER = ValueField("SMALLER")
@@ -49,7 +46,8 @@ UID = ValueField("UID")
 KEYWORD = ValueField("KEYWORD")
 UNKEYWORD = ValueField("UNKEYWORD")
 
-def _build(key:str, val):
+
+def _build(key: str, val):
     # Turning from_ --> "FROM", "to" --> "TO" etc.
     key = key.upper().rstrip("_")
     obj = BaseField._fields[key]
@@ -68,6 +66,7 @@ def _build(key:str, val):
             yield obj(*val)
     else:
         raise TypeError("Invalid field")
+
 
 def build(**kwargs) -> str:
     qry = None

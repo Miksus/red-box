@@ -1,6 +1,6 @@
-
 import pytest
 from redbox.query import ALL, NEW, OR, TO, UNSEEN, SINCE, RECENT, NOT, TEXT, HEADER, SUBJECT, SEEN, build
+from datetime import datetime
 
 # A282 SEARCH FLAGGED SINCE 1-Feb-1994 NOT FROM "Smith"
 
@@ -16,7 +16,8 @@ from redbox.query import ALL, NEW, OR, TO, UNSEEN, SINCE, RECENT, NOT, TEXT, HEA
         pytest.param(NOT(UNSEEN), '(NOT (UNSEEN))'),
         pytest.param(~UNSEEN, '(NOT (UNSEEN))'),
 
-        pytest.param(SINCE("2022-01-01"), '(SINCE "2022-01-01")'),
+        pytest.param(SINCE("01-Jan-2022"), '(SINCE "01-Jan-2022")'),
+        pytest.param(SINCE(datetime(2022, 1, 1)), '(SINCE "01-Jan-2022")'),
         pytest.param(HEADER("Mime-Version", "1.0"), '(HEADER "Mime-Version" "1.0")'),
 
         pytest.param(NOT(NEW & TEXT("hello")), '(NOT (ALL (NEW) (TEXT "hello")))'),
@@ -36,9 +37,10 @@ def test_expression(qry, expected):
         pytest.param(dict(unseen=False), '(NOT (UNSEEN))'),
         pytest.param(dict(seen=True), '(SEEN)'),
         pytest.param(dict(seen=False), '(NOT (SEEN))'),
-        pytest.param(dict(since="2022-01-01"), '(SINCE "2022-01-01")'),
+        pytest.param(dict(since="01-Jan-2022"), '(SINCE "01-Jan-2022")'),
         pytest.param(dict(header=('Mime-Version', '1.0')), '(HEADER "Mime-Version" "1.0")'),
-        pytest.param(dict(since="2022-01-01", seen=True), '(ALL (SINCE "2022-01-01") (SEEN))'),
+        pytest.param(dict(since="01-Jan-2022", seen=True), '(ALL (SINCE "01-Jan-2022") (SEEN))'),
+        pytest.param(dict(since=datetime(2022, 1, 1), seen=True), '(ALL (SINCE "01-Jan-2022") (SEEN))'),
 
         pytest.param(dict(from_="me@example.com"), '(FROM "me@example.com")'),
 

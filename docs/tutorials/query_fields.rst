@@ -105,6 +105,8 @@ Field Definitions
 
 **Time related**
 
+For those fields you can either pass instance of datetime.date or date-like string.
+
 .. glossary::
 
     BEFORE('date-like')

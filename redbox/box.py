@@ -79,6 +79,9 @@ class EmailBox:
             # box_data is in form: 
             # - '(\\HasNoChildren) "/" INBOX'
             # - '(\\HasNoChildren) "/" "Inbox"'
+            # Flags can also be separated by periods, in the form
+            # - '(\\HasNoChildren) "." INBOX'
+            # - '(\\HasNoChildren) "." "Inbox"'
             match = re.match(r'^[(](?P<flags>[^")]+)[)] "[/.]" "?(?P<name>[^"]+)', s)
             items = match.groupdict()
             name = items['name']

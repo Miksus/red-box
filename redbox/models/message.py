@@ -81,7 +81,10 @@ class EmailMessage(BaseModel):
     def date(self) -> Dict[str, str]:
         headers = {k.lower(): v for k, v in self.headers.items()}
         date = headers['date']
-        return datetime.datetime.strptime(date, "%a, %d %b %Y %H:%M:%S %z")
+        try:
+            return datetime.datetime.strptime(date, "%a, %d %b %Y %H:%M:%S %z")
+        except ValueError:
+            return datetime.datetime.strptime(date, "%d %b %Y %H:%M:%S %z")
 
     def read(self):
         "Read the message (set flag '\Seen')"
